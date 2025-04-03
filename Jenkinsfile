@@ -6,12 +6,14 @@ pipeline {
         }
     }
     stages {
-        stage('Build') {
-             steps {
-               // Get some code from a GitHub repository
-                git 'https://github.com/pravinagale500/SeleniumJava_DockerAWS.git'
-            }
+        stage('Start Selenium Container') {
             steps {
+                bat 'docker run -d -p 4444:4444 --name selenium-container selenium/standalone-chrome:latest'
+            }
+        }
+        stage('Build') {
+            steps {
+                git 'https://github.com/pravinagale500/SeleniumJava_DockerAWS.git'
                 bat 'mvn clean install'
             }
         }
@@ -37,23 +39,8 @@ pipeline {
         always {
             script {
                 try {
-                    sh 'docker stop selenium-container'
-                } catch(Exception e){
-                }
-            }
-        }
-        success {
-           script {
-                try {
-                    sh 'docker stop selenium-container'
-                } catch(Exception e){
-                }
-            }
-        }
-        failure {
-            script {
-                try {
-                    sh 'docker stop selenium-container'
+                    bat 'docker stop selenium-container'
+                    bat 'docker rm selenium-container'
                 } catch(Exception e){
                 }
             }
